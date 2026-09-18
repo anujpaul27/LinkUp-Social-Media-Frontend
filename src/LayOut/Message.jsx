@@ -17,9 +17,49 @@ export default function Message() {
   const [isPartnerTyping, setIsPartnerTyping] = useState(false);
   const typingTimeoutRef = useRef(null);
   const [loading, setLoading] = useState(false);
-
   const { DBUser } = useContext(UserContext);
-  const CURRENT_USER_ID = DBUser?._id; // Insertion Tail a linked list
+  const CURRENT_USER_ID = DBUser?._id;
+
+  // (AI Message Suggestion 1): create state for store suggestion message from the AI response
+  const [aiSuggestions, setAiSuggestions] = useState([]);
+  const [aiLoading, setAiLoading] = useState(false);
+
+  // (AI Message Suggestion 2): Create ai suggestion message with current and target user id
+  const CreateAiSuggestionMessage = async () => {
+    if (!activeReceiver?._id || !CURRENT_USER_ID) return;
+    try {
+      setAiLoading(true);
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/messages/generate-message-suggestion`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include", // for cookies and token after implement
+          body: JSON.stringify({
+            currentUserId: CURRENT_USER_ID,
+            targetUserId: activeReceiver._id,
+          }),
+        },
+      );
+
+      const data = await res.json(); // get the data from the response
+
+      if (data?.success) {
+        setAiSuggestions(data.suggestions); // store the message array into the state
+      }
+    } catch (err) {
+      console.error("AI Suggestions error:", err);
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  // (AI Message Suggestion 3): When change the chat place before suggestion will be clear
+  useEffect(() => {
+    setAiSuggestions([]);
+  }, [activeReceiver]);
 
   // Fetch all users/friends
   useEffect(() => {
@@ -190,7 +230,7 @@ export default function Message() {
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages,isPartnerTyping]);
+  }, [messages, isPartnerTyping]);
 
   const handleSendMessage = (e) => {
     e.preventDefault();
@@ -400,6 +440,40 @@ export default function Message() {
                   onSubmit={handleSendMessage}
                   className="p-4 lg:p-5 bg-[#1F2A33] border-t border-[#2A3A47]"
                 >
+                  {/* ================= AI MESSAGE SUGGESTIONS SECTION  ================= */}
+                  {/* (AI Message Suggestion 4): AI Click Button  */}
+                  <div className="mb-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <button
+                        type="button"
+                        onClick={CreateAiSuggestionMessage}
+                        disabled={aiLoading}
+                        className="flex items-center gap-1.5 text-xs bg-[#2A3A47] hover:bg-[#3A4A57] text-[#25D366] border border-[#25D366]/30 px-3 py-1.5 rounded-full transition-all disabled:opacity-50"
+                      >
+                        <span>✨</span>
+                        <span>
+                          {aiLoading ? "Generating..." : "Get AI Suggestions"}
+                        </span>
+                      </button>
+                    </div>
+
+                    {/* AI Suggestions Chips */}
+                    {aiSuggestions.length > 0 && (
+                      <div className="flex flex-wrap gap-2 animate-fadeIn">
+                        {aiSuggestions.map((suggestion, index) => (
+                          <button
+                            key={index}
+                            type="button"
+                            onClick={() => setMessageText(suggestion)}
+                            className="text-xs bg-[#2A3A47] hover:bg-[#25D366] hover:text-black text-white px-3 py-1.5 rounded-xl border border-[#3A4A57] transition-all text-left"
+                          >
+                            {suggestion}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  {/* ========================================================================= */}
                   <div className="flex gap-3">
                     <input
                       type="text"
