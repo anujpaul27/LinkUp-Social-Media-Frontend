@@ -5,7 +5,7 @@ import { io } from "socket.io-client";
 import { UserContext } from "../Context/ContextProvider";
 import axios from "axios";
 
-export default function Message () {
+export default function Message() {
   const [socket, setSocket] = useState(null);
   const [users, setUsers] = useState([]);
   const [activeReceiver, setActiveReceiver] = useState(null);
@@ -17,10 +17,9 @@ export default function Message () {
   const [isPartnerTyping, setIsPartnerTyping] = useState(false);
   const typingTimeoutRef = useRef(null);
   const [loading, setLoading] = useState(false);
-  
 
   const { DBUser } = useContext(UserContext);
-  const CURRENT_USER_ID = DBUser?._id; // Insertion Tail a linked list 
+  const CURRENT_USER_ID = DBUser?._id; // Insertion Tail a linked list
 
   // Fetch all users/friends
   useEffect(() => {
@@ -28,13 +27,15 @@ export default function Message () {
     const fetchFriends = async () => {
       setLoading(true);
       try {
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/user/${CURRENT_USER_ID}`, {
-          withCredentials: true,
-        });
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/user/${CURRENT_USER_ID}`,
+          {
+            withCredentials: true,
+          },
+        );
         setUsers(res.data);
       } catch (err) {
         console.error("Error fetching friends:", err);
-        
       } finally {
         setLoading(false);
       }
@@ -84,19 +85,22 @@ export default function Message () {
 
     const markMessagesAsSeen = async () => {
       try {
-        await fetch(`${import.meta.env.VITE_API_URL}/api/messages/mark-as-seen`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            senderId: activeReceiver._id,
-            receiverId: CURRENT_USER_ID,
-          }),
-        });
+        await fetch(
+          `${import.meta.env.VITE_API_URL}/api/messages/mark-as-seen`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              senderId: activeReceiver._id,
+              receiverId: CURRENT_USER_ID,
+            }),
+          },
+        );
 
         setUsers((prevUsers) =>
           prevUsers.map((u) =>
-            u._id === activeReceiver._id ? { ...u, unseenCount: 0 } : u
-          )
+            u._id === activeReceiver._id ? { ...u, unseenCount: 0 } : u,
+          ),
         );
       } catch (err) {
         console.error(err);
@@ -108,7 +112,7 @@ export default function Message () {
     const fetchChatHistory = async () => {
       try {
         const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/messages/${CURRENT_USER_ID}/${activeReceiver._id}`
+          `${import.meta.env.VITE_API_URL}/api/messages/${CURRENT_USER_ID}/${activeReceiver._id}`,
         );
         const data = await res.json();
         setMessages(data || []);
@@ -150,7 +154,7 @@ export default function Message () {
               };
             }
             return u;
-          })
+          }),
         );
 
         moveUserToTop(partnerId);
@@ -186,7 +190,7 @@ export default function Message () {
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages,isPartnerTyping]);
 
   const handleSendMessage = (e) => {
     e.preventDefault();
@@ -208,7 +212,7 @@ export default function Message () {
   };
 
   const filteredUsers = users.filter((user) =>
-    user?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+    user?.name?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (
@@ -231,15 +235,18 @@ export default function Message () {
           {/* ====================== SIDEBAR (Users List) ====================== */}
           <div
             className={`w-full lg:w-96 border-r border-[#2A3A47] flex flex-col bg-[#1F2A33] absolute lg:relative h-full z-20 transition-transform duration-300 ${
-              activeReceiver ? "-translate-x-full lg:translate-x-0" : "translate-x-0"
+              activeReceiver
+                ? "-translate-x-full lg:translate-x-0"
+                : "translate-x-0"
             }`}
           >
-            
-
             {/* Search */}
             <div className="p-4">
               <div className="relative">
-                <Search className="absolute left-4 top-3 text-[#8696A0]" size={20} />
+                <Search
+                  className="absolute left-4 top-3 text-[#8696A0]"
+                  size={20}
+                />
                 <input
                   type="text"
                   placeholder="Search users..."
@@ -313,13 +320,19 @@ export default function Message () {
                       className="w-10 h-10 lg:w-11 lg:h-11 rounded-full object-cover"
                     />
                     <div>
-                      <h2 className="font-semibold text-xl">{activeReceiver.name}</h2>
+                      <h2 className="font-semibold text-xl">
+                        {activeReceiver.name}
+                      </h2>
                       {isPartnerTyping ? (
                         <p className="text-sm text-[#25D366]">Typing...</p>
                       ) : onlineUsersList.includes(activeReceiver._id) ? (
-                        <p className="text-sm font-bold text-[#25D366]">online</p>
+                        <p className="text-sm font-bold text-[#25D366]">
+                          online
+                        </p>
                       ) : (
-                        <p className="text-sm font-bold text-[#d32525]">offline</p>
+                        <p className="text-sm font-bold text-[#d32525]">
+                          offline
+                        </p>
                       )}
                     </div>
                   </div>
@@ -343,9 +356,13 @@ export default function Message () {
                               : "bg-[#2A3A47] text-white rounded-bl-none"
                           }`}
                         >
-                          <p className="text-[17px] leading-relaxed">{msg.text}</p>
+                          <p className="text-[17px] leading-relaxed">
+                            {msg.text}
+                          </p>
                           <p className="text-xs mt-1 opacity-70 text-right">
-                            {new Date(msg.createdAt || Date.now()).toLocaleTimeString([], {
+                            {new Date(
+                              msg.createdAt || Date.now(),
+                            ).toLocaleTimeString([], {
                               hour: "2-digit",
                               minute: "2-digit",
                             })}
@@ -354,6 +371,27 @@ export default function Message () {
                       </motion.div>
                     );
                   })}
+                  {isPartnerTyping && (
+                    <div className="chat chat-start my-1">
+                      <div className="chat-bubble flex items-center space-x-1 py-4 px-3">
+                        {[0, 1, 2].map((index) => (
+                          <motion.span
+                            key={index}
+                            className="w-2 h-2 bg-current  rounded-full"
+                            initial={{ y: 0 }}
+                            animate={{ y: [0, -6, 0] }}
+                            transition={{
+                              duration: 0.6,
+                              repeat: Infinity,
+                              repeatType: "loop",
+                              delay: index * 0.15,
+                              ease: "easeInOut",
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   <div ref={chatEndRef} />
                 </div>
 
@@ -384,12 +422,13 @@ export default function Message () {
                 </form>
               </>
             ) : (
-              /* Empty State - Mobile Friendly */
-              <div className="flex-1 flex flex-col items-center justify-center text-center px-8 lg:hidden">
+              <div className="flex-1 flex flex-col items-center justify-center text-center px-8">
                 <div className="text-8xl mb-8 opacity-40">💬</div>
-                <h2 className="text-4xl font-light text-white mb-4">Welcome to WhatsApp</h2>
+                <h2 className="text-4xl font-light text-white mb-4">
+                  Welcome to WhatsApp
+                </h2>
                 <p className="text-[#8696A0] text-xl max-w-md">
-                  Select a user from the list to start chatting
+                  Select a user from the sidebar to start a secure conversation
                 </p>
               </div>
             )}

@@ -45,10 +45,7 @@ const router = createBrowserRouter([
         element: <OtherProfile></OtherProfile>,
         loader: ({ params }) => { return params.uid }
       },
-      {
-        path: '/message',
-        element: <Message></Message>
-      },
+      
       {
         path: '/saved',
         element: <Saved></Saved>
@@ -78,7 +75,11 @@ const router = createBrowserRouter([
   {
     path: '/logout',
     element: <PrivateRoute><LogOut></LogOut></PrivateRoute>
-  }
+  },
+  {
+        path: '/message',
+        element:  <PrivateRoute><Message></Message></PrivateRoute>
+      },
 
 ])
 
