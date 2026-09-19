@@ -19,52 +19,25 @@ export default function Message() {
   const [loading, setLoading] = useState(false);
   const { DBUser } = useContext(UserContext);
   const CURRENT_USER_ID = DBUser?._id;
-  
+
   // (AI Sms Loading 1): Add animated loading states
   const [loadingIndex, setLoadingIndex] = useState(0);
+
+  //
+  const [aiCount, setAiCount] = useState(0);
+  const [cooldown, setCooldown] = useState(0);
+  const [errorMessage, setErrorMessage] = useState("");
 
   // (AI Message Suggestion 1): create state for store suggestion message from the AI response
   const [aiSuggestions, setAiSuggestions] = useState([]);
   const [aiLoading, setAiLoading] = useState(false);
 
-  // (AI Message Suggestion 2): Create ai suggestion message with current and target user id
-  const CreateAiSuggestionMessage = async () => {
-    if (!activeReceiver?._id || !CURRENT_USER_ID) return;
-    try {
-      setAiLoading(true);
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/messages/generate-message-suggestion`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include", // for cookies and token after implement
-          body: JSON.stringify({
-            currentUserId: CURRENT_USER_ID,
-            targetUserId: activeReceiver._id,
-          }),
-        },
-      );
-
-      const data = await res.json(); // get the data from the response
-
-      if (data?.success) {
-        setAiSuggestions(data.suggestions); // store the message array into the state
-      }
-    } catch (err) {
-      console.error("AI Suggestions error:", err);
-    } finally {
-      setAiLoading(false);
-    }
-  };
-
-  // (AI Message Suggestion 3): When change the chat place before suggestion will be clear
+  // (AI Message Suggestion 2): When change the chat place before suggestion will be clear
   useEffect(() => {
     setAiSuggestions([]);
   }, [activeReceiver]);
 
-  // (AI Sms Loading 2): Create loading topic 
+  // (AI Sms Loading 2): Create loading topic
   const LOADING_TEXTS = [
     "Generating...",
     "Thinking...",
@@ -84,6 +57,72 @@ export default function Message() {
     }
     return () => clearInterval(interval);
   }, [aiLoading]);
+
+  useEffect(() => {
+    let timer;
+    if (cooldown > 0) {
+      timer = setInterval(() => {
+        setCooldown((prev) => prev - 1);
+      }, 1000);
+    } else if (cooldown === 0) {
+      setAiCount(0); // টাইমার শেষ হলে কাউন্ট রিকভার হবে
+      setErrorMessage("");
+    }
+    return () => clearInterval(timer);
+  }, [cooldown]);
+
+  // (AI Message Suggestion 3): Create ai suggestion message with current and target user id
+  const CreateAiSuggestionMessage = async () => {
+    if (!activeReceiver?._id || !CURRENT_USER_ID) return;
+
+    // ফ্রন্টএন্ড চেক: ১ মিনিটে ২ বারের বেশি হলে ব্লক করবে
+    if (aiCount >= 2 && cooldown > 0) {
+      setErrorMessage(`Please wait ${cooldown}s before asking again.`);
+      return;
+    }
+
+    try {
+      setAiLoading(true);
+      setErrorMessage("");
+
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/messages/generate-message-suggestion`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            currentUserId: CURRENT_USER_ID,
+            targetUserId: activeReceiver._id,
+          }),
+        },
+      );
+
+      const data = await res.json();
+
+      // যদি ব্যাকএন্ড থেকে ৪২৯ (Too Many Requests) আসে
+      if (res.status === 429) {
+        setErrorMessage(data.message || "Limit reached. Try again in 1 min.");
+        setCooldown(60);
+        return;
+      }
+
+      if (data?.success) {
+        setAiSuggestions(data.suggestions);
+
+        // কাউন্ট ১ বাড়ানো এবং ২ বার হয়ে গেলে ৬০ সেকেন্ড কুলডাউন স্টার্ট করা
+        const newCount = aiCount + 1;
+        setAiCount(newCount);
+        if (newCount >= 2) {
+          setCooldown(60);
+        }
+      }
+    } catch (err) {
+      console.error("AI Suggestions error:", err);
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   // Fetch all users/friends
   useEffect(() => {
@@ -471,8 +510,8 @@ export default function Message() {
                       <button
                         type="button"
                         onClick={CreateAiSuggestionMessage}
-                        disabled={aiLoading}
-                        className="flex items-center gap-1.5 text-xs bg-[#2A3A47] hover:bg-[#3A4A57] text-[#25D366] border border-[#25D366]/30 px-3 py-1.5 rounded-full transition-all disabled:opacity-70 overflow-hidden"
+                        disabled={aiLoading || cooldown > 0}
+                        className="flex items-center gap-1.5 text-xs bg-[#2A3A47] hover:bg-[#3A4A57] text-[#25D366] border border-[#25D366]/30 px-3 py-1.5 rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <motion.span
                           animate={aiLoading ? { rotate: 360 } : { rotate: 0 }}
@@ -499,6 +538,16 @@ export default function Message() {
                               >
                                 {LOADING_TEXTS[loadingIndex]}
                               </motion.span>
+                            ) : cooldown > 0 ? (
+                              <motion.span
+                                key="cooldown"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="text-amber-400 font-medium"
+                              >
+                                Wait {cooldown}s
+                              </motion.span>
                             ) : (
                               <motion.span
                                 key="static"
@@ -514,9 +563,20 @@ export default function Message() {
                       </button>
                     </div>
 
+                    {/* Error or Limit Warning Message */}
+                    {errorMessage && (
+                      <motion.p
+                        initial={{ opacity: 0, y: -5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-[11px] text-amber-400 mt-1 mb-2 font-medium flex items-center gap-1"
+                      >
+                        <span>⚠️</span> {errorMessage}
+                      </motion.p>
+                    )}
+
                     {/* AI Suggestions Chips */}
                     {aiSuggestions.length > 0 && (
-                      <div className="flex flex-wrap gap-2 animate-fadeIn">
+                      <div className="flex flex-wrap gap-2 animate-fadeIn mt-2">
                         {aiSuggestions.map((suggestion, index) => (
                           <button
                             key={index}
