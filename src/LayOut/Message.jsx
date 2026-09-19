@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useContext } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Send, ArrowLeft, Users, Search } from "lucide-react";
 import { io } from "socket.io-client";
 import { UserContext } from "../Context/ContextProvider";
@@ -19,6 +19,9 @@ export default function Message() {
   const [loading, setLoading] = useState(false);
   const { DBUser } = useContext(UserContext);
   const CURRENT_USER_ID = DBUser?._id;
+  
+  // (AI Sms Loading 1): Add animated loading states
+  const [loadingIndex, setLoadingIndex] = useState(0);
 
   // (AI Message Suggestion 1): create state for store suggestion message from the AI response
   const [aiSuggestions, setAiSuggestions] = useState([]);
@@ -60,6 +63,27 @@ export default function Message() {
   useEffect(() => {
     setAiSuggestions([]);
   }, [activeReceiver]);
+
+  // (AI Sms Loading 2): Create loading topic 
+  const LOADING_TEXTS = [
+    "Generating...",
+    "Thinking...",
+    "Analyzing chat...",
+    "Crafting replies...",
+    "Almost ready...",
+  ];
+
+  // (AI Sms Loading 3): use setInterval for after 2 second change your loading message subject
+  useEffect(() => {
+    let interval;
+    if (aiLoading) {
+      setLoadingIndex(0);
+      interval = setInterval(() => {
+        setLoadingIndex((prevIndex) => (prevIndex + 1) % LOADING_TEXTS.length);
+      }, 2000);
+    }
+    return () => clearInterval(interval);
+  }, [aiLoading]);
 
   // Fetch all users/friends
   useEffect(() => {
@@ -448,11 +472,44 @@ export default function Message() {
                         type="button"
                         onClick={CreateAiSuggestionMessage}
                         disabled={aiLoading}
-                        className="flex items-center gap-1.5 text-xs bg-[#2A3A47] hover:bg-[#3A4A57] text-[#25D366] border border-[#25D366]/30 px-3 py-1.5 rounded-full transition-all disabled:opacity-50"
+                        className="flex items-center gap-1.5 text-xs bg-[#2A3A47] hover:bg-[#3A4A57] text-[#25D366] border border-[#25D366]/30 px-3 py-1.5 rounded-full transition-all disabled:opacity-70 overflow-hidden"
                       >
-                        <span>✨</span>
-                        <span>
-                          {aiLoading ? "Generating..." : "Get AI Suggestions"}
+                        <motion.span
+                          animate={aiLoading ? { rotate: 360 } : { rotate: 0 }}
+                          transition={{
+                            repeat: Infinity,
+                            duration: 2,
+                            ease: "linear",
+                          }}
+                          className="inline-block"
+                        >
+                          ✨
+                        </motion.span>
+
+                        <span className="inline-flex min-w-[110px] text-left">
+                          <AnimatePresence mode="wait">
+                            {aiLoading ? (
+                              <motion.span
+                                key={loadingIndex}
+                                initial={{ y: 10, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                exit={{ y: -10, opacity: 0 }}
+                                transition={{ duration: 0.3 }}
+                                className="inline-block"
+                              >
+                                {LOADING_TEXTS[loadingIndex]}
+                              </motion.span>
+                            ) : (
+                              <motion.span
+                                key="static"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                              >
+                                Get AI Suggestions
+                              </motion.span>
+                            )}
+                          </AnimatePresence>
                         </span>
                       </button>
                     </div>
