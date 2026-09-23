@@ -3,6 +3,7 @@ import Sidebar from "./LeftSidebar";
 import Navbar from "./Navbar";
 import { Outlet } from "react-router";
 import { useState } from "react";
+import { Toaster } from "react-hot-toast";
 
 function Main() {
   const [darkMode, setDarkMode] = useState(true);
@@ -24,6 +25,7 @@ function Main() {
 
         {/* Sidebar */}
         <Sidebar darkMode={darkMode} setDarkMode={setDarkMode} />
+        <Toaster position="top-center" reverseOrder={false} />
       </div>
     </div>
   );

@@ -9,7 +9,6 @@ import Registration from './Authentication/Registration'
 import ContextProvider from './Context/ContextProvider'
 import PrivateRoute from './Authentication/PrivateRoute'
 import Profile from './LayOut/Profile'
-import LogOut from './Authentication/LogOut'
 import Friends from './LayOut/Friends'
 import EditProfile from './User/EditProfile'
 import OtherProfile from './LayOut/OtherProfile'
@@ -67,14 +66,6 @@ const router = createBrowserRouter([
   {
     path: '/registration',
     element: <Registration></Registration>
-  },
-  {
-    path: '/logout',
-    element: <PrivateRoute><LogOut></LogOut></PrivateRoute>
-  },
-  {
-    path: '/logout',
-    element: <PrivateRoute><LogOut></LogOut></PrivateRoute>
   },
   {
         path: '/message',
