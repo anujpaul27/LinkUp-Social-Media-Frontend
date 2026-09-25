@@ -1,23 +1,14 @@
-import React, { useContext, useState, useEffect } from "react";
+import { useContext, useState } from "react";
 import { UserContext } from "../Context/ContextProvider";
 import axios from "axios";
+import { Settings2, Moon, Lock, CheckCircle2, XCircle } from "lucide-react";
 
 const Setting = () => {
   const { DBUser, setDBUser } = useContext(UserContext);
-  const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
   const [bio, setBio] = useState(DBUser?.bio || "");
   const [isPrivate, setIsPrivate] = useState(DBUser?.isPrivateAccount || false);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState("");
-
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
-    localStorage.setItem("theme", theme);
-  }, [theme]);
-
-  const handleThemeChange = (e) => {
-    setTheme(e.target.checked ? "dark" : "light");
-  };
 
   const handleSaveSettings = async (e) => {
     e.preventDefault();
@@ -36,52 +27,47 @@ const Setting = () => {
 
       if (res.data?.success) {
         setDBUser(res.data.user);
-        setMessage("Settings saved successfully! ✅");
+        setMessage("success");
       }
     } catch (error) {
       console.error("Error saving settings:", error);
-      setMessage("Failed to save settings ❌");
+      setMessage("error");
     } finally {
       setIsSaving(false);
     }
   };
 
   return (
-    <div className=" w-full  mx-auto py-8 px-4">
-      <h2 className="text-2xl font-bold mb-6 text-base-content flex items-center gap-2">
-        ⚙️ Settings & Preferences
+    <div className="max-w-2xl mx-auto py-6 sm:py-8 px-3 sm:px-4">
+      <h2 className="text-xl sm:text-2xl font-bold mb-6 text-base-content flex items-center gap-2">
+        <Settings2 className="w-6 h-6 text-primary" />
+        Settings & Preferences
       </h2>
 
-      <div className="bg-base-100 border border-base-300 shadow-md rounded-xl p-6 flex flex-col gap-6">
-        {/* Theme Settings */}
-        <div className="flex items-center justify-between pb-4 border-b border-base-200">
-          <div>
-            <h3 className="font-semibold text-lg">Appearance</h3>
-            <p className="text-sm text-base-content/60">
-              Toggle between Light and Dark mode
-            </p>
+      <div className="bg-base-200 border border-base-300/60 rounded-3xl p-5 sm:p-6 flex flex-col gap-6">
+        {/* Appearance */}
+        <div className="flex items-center justify-between gap-4 pb-5 border-b border-dashed border-base-content/10">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+              <Moon className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-base">Appearance</h3>
+              <p className="text-sm text-base-content/50">
+                Dark theme is on app-wide for a consistent LinkUp look.
+              </p>
+            </div>
           </div>
-          <label className="swap swap-rotate btn btn-ghost btn-circle">
-            <input
-              type="checkbox"
-              onChange={handleThemeChange}
-              checked={theme === "dark"}
-            />
-            {/* Sun Icon */}
-            <span className="text-2xl">🌞</span>
-            {/* Moon Icon */}
-            <span className="text-2xl">🌙</span>
-          </label>
         </div>
 
         {/* Account Info Form */}
-        <form onSubmit={handleSaveSettings} className="flex flex-col gap-4">
+        <form onSubmit={handleSaveSettings} className="flex flex-col gap-5">
           <div>
-            <label className="label">
+            <label className="label px-0">
               <span className="label-text font-medium">Profile Bio</span>
             </label>
             <textarea
-              className="textarea textarea-bordered w-full focus:outline-none"
+              className="textarea w-full bg-base-300/40 border border-base-300 focus:border-primary focus:outline-none rounded-2xl transition-colors"
               placeholder="Write a short bio about yourself..."
               rows={3}
               value={bio}
@@ -90,32 +76,49 @@ const Setting = () => {
           </div>
 
           {/* Privacy Toggle */}
-          <div className="flex items-center justify-between py-2">
-            <div>
-              <h4 className="font-medium">Private Account</h4>
-              <p className="text-xs text-base-content/60">
-                Only approved followers can see your posts.
-              </p>
+          <div className="flex items-center justify-between gap-4 py-1">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+                <Lock className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h4 className="font-medium text-sm sm:text-base">Private Account</h4>
+                <p className="text-xs sm:text-sm text-base-content/50">
+                  Only approved followers can see your posts.
+                </p>
+              </div>
             </div>
             <input
               type="checkbox"
-              className="toggle toggle-primary"
+              className="toggle toggle-primary shrink-0"
               checked={isPrivate}
               onChange={(e) => setIsPrivate(e.target.checked)}
             />
           </div>
 
           {message && (
-            <p className="text-sm font-medium text-center text-primary mt-2">
-              {message}
+            <p
+              className={`text-sm font-medium text-center mt-1 flex items-center justify-center gap-1.5 ${
+                message === "success" ? "text-success" : "text-error"
+              }`}
+            >
+              {message === "success" ? (
+                <>
+                  <CheckCircle2 className="w-4 h-4" /> Settings saved successfully!
+                </>
+              ) : (
+                <>
+                  <XCircle className="w-4 h-4" /> Failed to save settings
+                </>
+              )}
             </p>
           )}
 
-          <div className="mt-4 flex justify-end">
+          <div className="mt-2 flex justify-end">
             <button
               type="submit"
               disabled={isSaving}
-              className="btn btn-primary rounded-full px-6"
+              className="btn btn-primary rounded-full px-6 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2"
             >
               {isSaving ? "Saving..." : "Save Changes"}
             </button>
