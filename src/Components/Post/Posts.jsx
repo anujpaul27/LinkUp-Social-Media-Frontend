@@ -55,7 +55,7 @@ const Posts = ({ post, onAction }) => {
       const res = await axios.delete(
         `${import.meta.env.VITE_API_URL}/api/posts/delete/${id}`,
         {
-          data: { userId: DBUser.uid },
+          data: { userId: DBUser?.uid },
         },
       );
 
@@ -115,7 +115,7 @@ const Posts = ({ post, onAction }) => {
               </div>
             </div>
             <div>
-              <Link to={`/otherprofile/${post.uid}`}>
+              <Link to={`/otherprofile/${post?.uid}`}>
                 <h3 className="font-semibold">{post?.userName}</h3>
               </Link>
               <p className="lg:text-sm md:text-sm text-[10px] opacity-70">
@@ -127,7 +127,10 @@ const Posts = ({ post, onAction }) => {
           {/* ========== ⋯ Dropdown Menu ========== */}
           <div className="dropdown dropdown-end">
             {/* Trigger Button */}
-            <button tabIndex={0} className="btn btn-ghost btn-sm btn-circle m-1">
+            <button
+              tabIndex={0}
+              className="btn btn-ghost btn-sm btn-circle m-1"
+            >
               ⋯
             </button>
 
@@ -151,7 +154,7 @@ const Posts = ({ post, onAction }) => {
               </li>
 
               {/* Delete - only for owner */}
-              {DBUser.uid === post.uid && (
+              {DBUser.uid === post?.uid && (
                 <li>
                   <button
                     onClick={(e) => {
@@ -166,7 +169,7 @@ const Posts = ({ post, onAction }) => {
               )}
 
               {/* Report - only for non-owner */}
-              {DBUser.uid !== post.uid && (
+              {DBUser?.uid !== post?.uid && (
                 <li>
                   <button
                     onClick={(e) => {
