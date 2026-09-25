@@ -48,14 +48,14 @@ const Posts = ({ post, onAction }) => {
   };
 
   // ========== Delete ==========
-  const handleDelete = async () => {
+  const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this post?")) return;
 
     try {
       const res = await axios.delete(
-        `${import.meta.env.VITE_API_URL}/api/posts/${post._id}`,
+        `${import.meta.env.VITE_API_URL}/api/posts/delete/${id}`,
         {
-          data: { userId: DBUser._id },
+          data: { userId: DBUser.uid },
         },
       );
 
@@ -156,7 +156,7 @@ const Posts = ({ post, onAction }) => {
                   <button
                     onClick={(e) => {
                       e.preventDefault();
-                      handleDelete();
+                      handleDelete(post._id);
                     }}
                     className="text-error flex items-center gap-2"
                   >
