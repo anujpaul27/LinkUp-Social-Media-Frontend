@@ -1,3 +1,66 @@
 @import "tailwindcss";
 @plugin "daisyui";
 @custom-variant dark (&:where(.dark, .dark *));
+
+/* ============================================================
+   LinkUp — Dark Slate / Electric Blue theme
+   Applied globally so every page (not just Home) shares it.
+   ============================================================ */
+@plugin "daisyui/theme" {
+  name: "dark";
+  default: true;
+  prefersdark: true;
+  color-scheme: dark;
+
+  /* Surfaces - dark slate / deep navy */
+  --color-base-100: #0f111a; /* page background */
+  --color-base-200: #151827; /* cards, panels */
+  --color-base-300: #1c2033; /* borders / raised surfaces */
+  --color-base-content: #e7e9f2;
+
+  /* Electric blue accent */
+  --color-primary: #3b82f6;
+  --color-primary-content: #ffffff;
+
+  --color-secondary: #6366f1;
+  --color-secondary-content: #ffffff;
+
+  --color-accent: #2f80ed;
+  --color-accent-content: #ffffff;
+
+  --color-neutral: #1c2033;
+  --color-neutral-content: #e7e9f2;
+
+  --color-info: #38bdf8;
+  --color-info-content: #06232f;
+  --color-success: #34d399;
+  --color-success-content: #062018;
+  --color-warning: #fbbf24;
+  --color-warning-content: #2c1c02;
+  --color-error: #f87171;
+  --color-error-content: #2c0a0a;
+
+  --radius-selector: 1rem;
+  --radius-field: 0.75rem;
+  --radius-box: 1.25rem;
+
+  --border: 1px;
+}
+
+/* soft dotted dividers used throughout the redesigned Home layout */
+.divider-dotted {
+  border-top: 1px dashed color-mix(in oklab, var(--color-base-content) 15%, transparent);
+}
+
+/* thin scrollbars for the sidebars / stories rail */
+.scrollbar-thin::-webkit-scrollbar {
+  height: 4px;
+  width: 4px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--color-base-content) 20%, transparent);
+  border-radius: 999px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}

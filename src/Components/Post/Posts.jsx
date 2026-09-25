@@ -1,8 +1,9 @@
 import { motion } from "framer-motion";
-import { useState, useContext } from "react";
+import { useState, useContext, useMemo } from "react";
 import { Link } from "react-router";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { MoreHorizontal, MessageCircle, Bookmark, Repeat2, Trash2, Flag } from "lucide-react";
 import PostLike from "./PostLike";
 import CommentPost from "./CommentPost";
 import { UserContext } from "../../Context/ContextProvider";
@@ -16,6 +17,13 @@ const Posts = ({ post, onAction }) => {
 
   const words = (post?.postText || "").split(" ");
   const preview = words.slice(0, 20).join(" ");
+
+  // Pull #hashtags out of the caption so they can be styled like the
+  // reference design, without changing what's stored in postText.
+  const hashtags = useMemo(() => {
+    const matches = (post?.postText || "").match(/#[\p{L}\p{N}_]+/gu);
+    return matches ? [...new Set(matches)] : [];
+  }, [post?.postText]);
 
   // ========== Save / Unsave ==========
   const handleSaveToggle = async () => {
@@ -55,7 +63,7 @@ const Posts = ({ post, onAction }) => {
       const res = await axios.delete(
         `${import.meta.env.VITE_API_URL}/api/posts/delete/${id}`,
         {
-          data: { userId: DBUser?.uid },
+          data: { userId: DBUser.uid },
         },
       );
 
@@ -101,45 +109,37 @@ const Posts = ({ post, onAction }) => {
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="card bg-base-100 shadow-xl mb-6 hover:shadow-2xl transition-shadow"
+      className="bg-base-200 rounded-3xl mb-6 overflow-hidden border border-base-300/60"
     >
-      <div className="card-body">
+      <div className="p-5">
         {/* ========== Header ========== */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="avatar">
-              <div className="w-12 rounded-full">
+              <div className="w-11 rounded-full">
                 <Link to={`/otherprofile/${post?.uid}`}>
                   <img src={post?.userPhoto} alt="profile photo" />
                 </Link>
               </div>
             </div>
             <div>
-              <Link to={`/otherprofile/${post?.uid}`}>
-                <h3 className="font-semibold">{post?.userName}</h3>
+              <Link to={`/otherprofile/${post.uid}`}>
+                <h3 className="font-semibold text-sm">{post?.userName}</h3>
               </Link>
-              <p className="lg:text-sm md:text-sm text-[10px] opacity-70">
-                {post?.createAt} · 🌐
-              </p>
+              <p className="text-xs text-base-content/50">{post?.createAt}</p>
             </div>
           </div>
 
-          {/* ========== ⋯ Dropdown Menu ========== */}
+          {/* ========== Dropdown Menu ========== */}
           <div className="dropdown dropdown-end">
-            {/* Trigger Button */}
-            <button
-              tabIndex={0}
-              className="btn btn-ghost btn-sm btn-circle m-1"
-            >
-              ⋯
+            <button tabIndex={0} className="btn btn-ghost btn-sm btn-circle">
+              <MoreHorizontal className="w-4.5 h-4.5" />
             </button>
 
-            {/* Dropdown Content */}
             <ul
               tabIndex={0}
-              className="dropdown-content menu p-2 shadow-lg bg-base-200 rounded-box w-30 z-100 border border-base-300"
+              className="dropdown-content menu p-2 shadow-lg bg-base-300 rounded-box w-40 z-100 border border-base-content/10"
             >
-              {/* Save / Unsave */}
               <li>
                 <button
                   onClick={(e) => {
@@ -149,12 +149,12 @@ const Posts = ({ post, onAction }) => {
                   disabled={isSaving}
                   className="flex items-center gap-2"
                 >
-                  {isSaved ? <>Unsave</> : <>Save post</>}
+                  <Bookmark className="w-4 h-4" />
+                  {isSaved ? "Unsave" : "Save post"}
                 </button>
               </li>
 
-              {/* Delete - only for owner */}
-              {DBUser.uid === post?.uid && (
+              {DBUser.uid === post.uid && (
                 <li>
                   <button
                     onClick={(e) => {
@@ -163,21 +163,22 @@ const Posts = ({ post, onAction }) => {
                     }}
                     className="text-error flex items-center gap-2"
                   >
+                    <Trash2 className="w-4 h-4" />
                     Delete
                   </button>
                 </li>
               )}
 
-              {/* Report - only for non-owner */}
-              {DBUser?.uid !== post?.uid && (
+              {DBUser.uid !== post.uid && (
                 <li>
                   <button
                     onClick={(e) => {
                       e.preventDefault();
                       handleReport();
                     }}
-                    className=" flex items-center gap-2"
+                    className="flex items-center gap-2"
                   >
+                    <Flag className="w-4 h-4" />
                     Report
                   </button>
                 </li>
@@ -189,58 +190,76 @@ const Posts = ({ post, onAction }) => {
         {/* ========== Post Text ========== */}
         <div>
           {!isExpanded && words.length > 21 ? (
-            <p className="mt-4 lg:text-[15px] md:text-md text-sm">
+            <p className="mt-4 text-[15px] leading-relaxed">
               {preview}...{" "}
               <button
-                className="text-blue-500 text-sm hover:underline"
+                className="text-primary text-sm hover:underline"
                 onClick={() => setIsExpanded(true)}
               >
-                Read more
+                read more
               </button>
             </p>
           ) : (
-            <p className="mt-4 lg:text-[15px] md:text-md text-sm">
-              {post?.postText}
-            </p>
+            <p className="mt-4 text-[15px] leading-relaxed">{post?.postText}</p>
           )}
 
           {isExpanded && (
             <button
               onClick={() => setIsExpanded(false)}
-              className="text-blue-500 hover:underline"
+              className="text-primary text-sm hover:underline"
             >
               Show less
             </button>
           )}
+
+          {hashtags.length > 0 && (
+            <p className="mt-2 text-sm text-primary">{hashtags.join(" ")}</p>
+          )}
         </div>
+      </div>
 
-        {/* ========== Post Image ========== */}
-        {post.imageLink && (
-          <figure className="mt-4">
-            <img
-              src={post?.imageLink}
-              alt="Post"
-              className="w-full rounded-xl object-cover max-h-[500px]"
-            />
-          </figure>
-        )}
+      {/* ========== Post Image ========== */}
+      {post.imageLink && (
+        <figure className="px-5">
+          <img
+            src={post?.imageLink}
+            alt="Post"
+            className="w-full rounded-2xl object-cover max-h-[500px]"
+          />
+        </figure>
+      )}
 
-        {/* ========== Action Buttons ========== */}
-        <div className="flex justify-between mt-4 pt-4 border-t">
-          <button className="btn btn-ghost flex-1 gap-2">
-            <PostLike post={post} />
-          </button>
+      {/* ========== Action Buttons ========== */}
+      <div className="flex items-center justify-between px-5 py-4 mt-1">
+        <div className="flex items-center gap-5">
+          <PostLike post={post} />
           <button
             onClick={() => setIsCommentDiv(!isCommentDiv)}
-            className="btn btn-ghost flex-1 gap-2"
+            className="flex items-center gap-2 text-base-content/70 hover:text-primary text-sm"
           >
-            💬 Comment
+            <MessageCircle className="w-5 h-5" />
+            {(post?.comments?.length || 0) > 0 ? post.comments.length : "Comment"}
           </button>
-          <button className="btn btn-ghost flex-1 gap-2">🔄 Share</button>
+          <button className="flex items-center gap-2 text-base-content/70 hover:text-primary text-sm">
+            <Repeat2 className="w-5 h-5" />
+            Share
+          </button>
         </div>
 
-        {isCommentDiv && <CommentPost post={post} />}
+        <button
+          onClick={handleSaveToggle}
+          disabled={isSaving}
+          className={`btn btn-ghost btn-circle btn-sm ${isSaved ? "text-primary" : "text-base-content/60"}`}
+        >
+          <Bookmark className="w-5 h-5" fill={isSaved ? "currentColor" : "none"} />
+        </button>
       </div>
+
+      {isCommentDiv && (
+        <div className="px-5 pb-5">
+          <CommentPost post={post} />
+        </div>
+      )}
     </motion.div>
   );
 };
