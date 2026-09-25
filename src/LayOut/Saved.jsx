@@ -1,7 +1,7 @@
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { UserContext } from "../Context/ContextProvider";
-import { Link } from "react-router-dom"; // optional – remove if not needed
+import { Bookmark, PlayCircle, FileText, FolderPlus, Trash2 } from "lucide-react";
 
 const Saved = () => {
   const { DBUser } = useContext(UserContext);
@@ -46,14 +46,17 @@ const Saved = () => {
   };
 
   return (
-    <div className="w-full mx-auto py-4 px-3 sm:px-4">
+    <div className="max-w-3xl mx-auto py-6 px-3 sm:px-4 md:px-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold text-base-content flex items-center gap-2">
-          🔖 Saved
+      <div className="flex items-center justify-between mb-5 pb-4 border-b border-dashed border-base-content/10">
+        <h2 className="text-lg sm:text-xl font-semibold text-base-content flex items-center gap-2">
+          <Bookmark className="w-5 h-5 text-primary" />
+          Saved
         </h2>
         <div className="flex gap-2">
-          <button className="btn btn-sm btn-ghost rounded-full">All</button>
+          <button className="btn btn-sm btn-primary rounded-full px-4 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
+            All
+          </button>
           {/* You can add more filters later */}
         </div>
       </div>
@@ -63,7 +66,8 @@ const Saved = () => {
           <span className="loading loading-spinner loading-lg text-primary"></span>
         </div>
       ) : savedPosts.length === 0 ? (
-        <div className="text-center py-16 bg-base-200/50 rounded-2xl">
+        <div className="text-center py-16 bg-base-200/60 rounded-2xl border border-base-300/40">
+          <Bookmark className="w-8 h-8 mx-auto text-base-content/30 mb-3" />
           <p className="text-lg font-medium text-base-content/70">
             No saved posts yet!
           </p>
@@ -82,10 +86,10 @@ const Saved = () => {
             return (
               <div
                 key={post._id}
-                className="flex gap-3 p-3 rounded-xl bg-base-200/60 hover:bg-base-200 transition-colors border border-base-300/40"
+                className="flex gap-3 p-3 rounded-2xl bg-base-200/60 hover:bg-base-200 transition-colors border border-base-300/40"
               >
                 {/* Left Thumbnail */}
-                <div className="relative flex-shrink-0 w-24 h-24 sm:w-28 sm:h-28 rounded-lg overflow-hidden bg-base-300">
+                <div className="relative shrink-0 w-20 h-20 sm:w-28 sm:h-28 rounded-xl overflow-hidden bg-base-300">
                   {post.imageLink ? (
                     <img
                       src={post.imageLink}
@@ -94,7 +98,7 @@ const Saved = () => {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-base-content/40">
-                      <span className="text-2xl">📄</span>
+                      <FileText className="w-6 h-6" />
                     </div>
                   )}
 
@@ -103,16 +107,7 @@ const Saved = () => {
                     post.mediaType === "video" ||
                     post.mediaType === "reel") && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                      <div className="w-9 h-9 rounded-full bg-white/90 flex items-center justify-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                          className="w-5 h-5 text-black ml-0.5"
-                        >
-                          <path d="M8 5v14l11-7z" />
-                        </svg>
-                      </div>
+                      <PlayCircle className="w-9 h-9 text-white/90" />
                     </div>
                   )}
 
@@ -156,42 +151,16 @@ const Saved = () => {
 
                   {/* Action Buttons */}
                   <div className="flex items-center gap-2 mt-3">
-                    <button className="btn btn-sm btn-ghost bg-base-300/60 hover:bg-base-300 rounded-lg text-xs font-medium px-3 h-8 min-h-0">
-                      Add to Collection
+                    <button className="btn btn-sm btn-ghost bg-base-300/60 hover:bg-base-300 rounded-lg text-xs font-medium px-3 h-8 min-h-0 gap-1.5 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
+                      <FolderPlus className="w-3.5 h-3.5" />
+                      <span className="hidden xs:inline">Add to Collection</span>
                     </button>
 
-                    <button className="btn btn-sm btn-ghost btn-square h-8 w-8 min-h-0 rounded-lg">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.8}
-                        stroke="currentColor"
-                        className="w-4 h-4"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z"
-                        />
-                      </svg>
-                    </button>
-
-                    <button className="btn btn-sm btn-ghost btn-square h-8 w-8 min-h-0 rounded-lg">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.8}
-                        stroke="currentColor"
-                        className="w-4 h-4"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"
-                        />
-                      </svg>
+                    <button
+                      aria-label="Remove from saved"
+                      className="btn btn-sm btn-ghost btn-square h-8 w-8 min-h-0 rounded-lg hover:text-error focus-visible:outline-2 focus-visible:outline-error focus-visible:outline-offset-2"
+                    >
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
