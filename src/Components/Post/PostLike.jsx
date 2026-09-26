@@ -1,5 +1,6 @@
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
 import axios from "axios";
+import { Heart } from "lucide-react";
 import { UserContext } from "../../Context/ContextProvider";
 
 const PostLike = ({ post }) => {
@@ -40,17 +41,17 @@ const PostLike = ({ post }) => {
   };
 
   return (
-    <div className="flex">
-      <button
-        onClick={handleLikeToggle}
-        className="flex justify-center items-center  cursor-pointer lg:gap-2 "
-      >
-        <p className=" text-2xl ">{isLikedByMe ? "❤️" : "🤍"} </p>
-        <p className=" lg:text-md font-bold  ">
-          {likes.length} {likes.length === 1 ? "Like" : "likes"}
-        </p>    
-      </button>
-    </div>
+    <button
+      onClick={handleLikeToggle}
+      className={`flex items-center gap-2 text-sm cursor-pointer ${
+        isLikedByMe ? "text-error" : "text-base-content/70 hover:text-error"
+      }`}
+    >
+      <Heart className="w-5 h-5" fill={isLikedByMe ? "currentColor" : "none"} />
+      <span>
+        {likes.length} {likes.length === 1 ? "Like" : "likes"}
+      </span>
+    </button>
   );
 };
 
