@@ -1,5 +1,6 @@
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
 import { motion } from "framer-motion";
+import { ImagePlus, Sparkles, X } from "lucide-react";
 import { UserContext } from "../Context/ContextProvider";
 import axios from "axios";
 
@@ -113,23 +114,23 @@ const CreatePost = () => {
   };
 
   return (
-    <div className={`max-w-2xl my-6 px-4 ${isSubmitting ? "loading" : ""}`}>
+    <div className={`max-w-2xl mx-auto my-4 sm:my-6 px-3 sm:px-4 ${isSubmitting ? "loading" : ""}`}>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="card bg-base-100 shadow-xl rounded-xl overflow-hidden border border-base-400"
+        className="bg-base-200 rounded-3xl overflow-hidden border border-base-300/60"
       >
         {/* Header */}
-        <div className="px-5 py-4 border-b border-base-200 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="avatar">
-              <div className="w-10 rounded-full ring-2 ring-primary ring-offset-2">
+        <div className="px-4 sm:px-5 py-4 border-b border-dashed border-base-content/10 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="avatar shrink-0">
+              <div className="w-10 rounded-full ring ring-primary/50 ring-offset-base-200 ring-offset-2">
                 <img src={DBUser?.photoURL} alt="Your profile" />
               </div>
             </div>
-            <div>
-              <h3 className="font-semibold">{DBUser?.name}</h3>
-              <p className="text-xs text-base-content/60">Public post</p>
+            <div className="min-w-0">
+              <h3 className="font-semibold truncate">{DBUser?.name}</h3>
+              <p className="text-xs text-base-content/50">Public post</p>
             </div>
           </div>
 
@@ -139,18 +140,19 @@ const CreatePost = () => {
               type="button"
               onClick={() => handleAiGeneration("text")}
               disabled={isAiGenerating}
-              className="btn btn-xs btn-outline btn-primary rounded-full"
+              className="btn btn-xs btn-outline btn-primary rounded-full gap-1 shrink-0 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2"
             >
-              ✨ {isAiGenerating ? "Polishing..." : "Write with AI"}
+              <Sparkles className="w-3.5 h-3.5" />
+              {isAiGenerating ? "Polishing..." : "Write with AI"}
             </button>
           )}
         </div>
 
         {/* Post Input Area */}
-        <div className="p-5">
+        <div className="p-4 sm:p-5">
           <textarea
-            className="textarea textarea-ghost w-full min-h-[120px] text-lg placeholder-base-content/50 focus:outline-none resize-none bg-transparent"
-            placeholder="What's on your mind?."
+            className="textarea w-full min-h-[120px] text-base sm:text-lg placeholder:text-base-content/40 focus:outline-none resize-none bg-transparent border-none p-0"
+            placeholder="What's on your mind?"
             value={postText}
             onChange={(e) => setPostText(e.target.value)}
             rows={4}
@@ -158,11 +160,11 @@ const CreatePost = () => {
 
           {/* Image Preview */}
           {previewImage && (
-            <div className="relative mt-4 rounded-xl overflow-hidden border border-base-300">
+            <div className="relative mt-4 rounded-2xl overflow-hidden border border-base-300">
               <img
                 src={previewImage}
                 alt="Preview"
-                className="w-full max-h-96 object-contain bg-black/5"
+                className="w-full max-h-96 object-contain bg-base-300/40"
               />
 
               {/* Image AI Caption Button */}
@@ -170,9 +172,12 @@ const CreatePost = () => {
                 type="button"
                 onClick={() => handleAiGeneration("image")}
                 disabled={isAiGenerating}
-                className="btn btn-sm btn-primary absolute bottom-3 left-3 rounded-full shadow-lg disabled:bg-primary disabled:bg-opacity-70 disabled:text-white"
+                className="btn btn-sm btn-primary absolute bottom-3 left-3 right-14 sm:right-auto rounded-full shadow-lg gap-1.5 disabled:bg-primary disabled:bg-opacity-70 disabled:text-primary-content focus-visible:outline-2 focus-visible:outline-primary-content focus-visible:outline-offset-2"
               >
-                ✨ {isAiGenerating ? "Generating..." : "Create AI Caption According Your Image "}
+                <Sparkles className="w-4 h-4 shrink-0" />
+                <span className="truncate">
+                  {isAiGenerating ? "Generating..." : "Create AI caption from image"}
+                </span>
               </button>
 
               <button
@@ -180,29 +185,27 @@ const CreatePost = () => {
                   setPreviewImage(null);
                   setSelectedImage(null);
                 }}
-                className="btn btn-circle btn-error btn-sm absolute top-2 right-2"
+                aria-label="Remove image"
+                className="btn btn-circle btn-error btn-sm absolute top-2 right-2 focus-visible:outline-2 focus-visible:outline-error focus-visible:outline-offset-2"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
           )}
         </div>
 
         {/* Action Buttons */}
-        <div className="px-5 py-3 border-t border-base-200 flex items-center justify-between bg-base-200/50">
-          <div className="flex gap-4">
-            <label className="cursor-pointer hover:bg-base-300 p-2 rounded-lg transition">
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleImageChange}
-              />
-              <p className="text-sm lg:text-lg md:text-lg">
-                <span>📷</span> Photo/Video
-              </p>
-            </label>
-          </div>
+        <div className="px-4 sm:px-5 py-3 border-t border-dashed border-base-content/10 flex items-center justify-between gap-3 bg-base-300/20">
+          <label className="flex items-center gap-2 cursor-pointer hover:bg-base-300 p-2 rounded-xl transition-colors text-sm sm:text-base text-base-content/80">
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleImageChange}
+            />
+            <ImagePlus className="w-5 h-5 text-primary" />
+            <span className="hidden xs:inline sm:inline">Photo/Video</span>
+          </label>
 
           <button
             onClick={handleSubmit}
@@ -211,7 +214,7 @@ const CreatePost = () => {
               isAiGenerating ||
               (!postText.trim() && !previewImage)
             }
-            className="btn btn-primary px-8 rounded-full lg:min-w-[120px] md:min-w-[120px]"
+            className="btn btn-primary px-6 sm:px-8 rounded-full sm:min-w-[120px] focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2"
           >
             {isSubmitting ? "Posting..." : "Post"}
           </button>
