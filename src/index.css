@@ -47,6 +47,12 @@
   --border: 1px;
 }
 
+body {
+  background: 
+    radial-gradient(ellipse at top, #12182a 0%, transparent 60%),
+    #0a0e1a;
+}
+
 /* soft dotted dividers used throughout the redesigned Home layout */
 .divider-dotted {
   border-top: 1px dashed color-mix(in oklab, var(--color-base-content) 15%, transparent);
